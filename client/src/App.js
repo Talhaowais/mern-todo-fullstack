@@ -15,16 +15,13 @@ function App() {
   const [editError, setEditError] = useState("");
   const [loadingUpdate, setLoadingUpdate] = useState(false);
 
-  // hover/focus states
-  const [inputFocus, setInputFocus] = useState(false);
-  const [editInputFocus, setEditInputFocus] = useState(false);
-  const [addHover, setAddHover] = useState(false);
-  const [updateHover, setUpdateHover] = useState(false);
-  const [editHover, setEditHover] = useState({}); // object for each edit button
-
   const fetchTodos = async () => {
-    const res = await api.get("/todos");
-    setTodos(res.data);
+    try {
+      const res = await api.get("/todos");
+      setTodos(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -38,282 +35,137 @@ function App() {
       setError("⚠ Task cannot be empty. Please enter any task.");
       return;
     }
+
     try {
       setLoadingAdd(true);
       setError("");
       await api.post("/todos", { task });
       setTask("");
       fetchTodos();
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoadingAdd(false);
     }
   };
 
-  // DELETE TODO
+  // DELETE TODO (FIXED _id)
   const deleteTodo = async (id) => {
     try {
       setLoadingDelete(id);
       await api.delete(`/todos/${id}`);
       fetchTodos();
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoadingDelete(null);
     }
   };
 
-  // OPEN MODAL
+  // OPEN MODAL (FIXED _id)
   const openModal = (todo) => {
-    setEditingId(todo.id);
+    setEditingId(todo._id);
     setEditTask(todo.task);
     setEditError("");
     setIsModalOpen(true);
   };
 
-  // UPDATE TODO
+  // UPDATE TODO (FIXED _id)
   const updateTodo = async () => {
     if (!editTask.trim()) {
       setEditError("⚠ Task cannot be empty. Please enter any task.");
       return;
     }
+
     try {
       setLoadingUpdate(true);
       setEditError("");
       await api.put(`/todos/${editingId}`, { task: editTask });
       setIsModalOpen(false);
       fetchTodos();
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoadingUpdate(false);
     }
   };
 
-  // Dynamic input styles
-  const inputStyle = {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #ddd",
-    outline: "none",
-    transition: "0.2s",
-    borderColor: inputFocus ? "#3498db" : "#ddd",
-    boxShadow: inputFocus ? "0 0 5px #3498db" : "none",
-  };
-
-  const editInputStyle = {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #ddd",
-    outline: "none",
-    transition: "0.2s",
-    borderColor: editInputFocus ? "#3498db" : "#ddd",
-    boxShadow: editInputFocus ? "0 0 5px #3498db" : "none",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #74ebd5, #ACB6E5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          padding: "30px",
-          borderRadius: "15px",
-          width: "380px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-          textAlign: "center",
-        }}
-      >
-        <h3>Project Details</h3>
-        <p><strong>React</strong> project backend with <strong>Node</strong>. <strong>Express</strong> as a <strong>framework</strong>. <strong>Sequelize</strong> as an <strong>ORM</strong>. <strong>Postgress</strong> as <strong>DB</strong></p>
-        <h2 style={{ marginBottom: "20px" }}>✨ My Todo List</h2>
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <h1 style={styles.title}>Task Manager</h1>
+        <p style={styles.subtitle}>MERN Stack Application</p>
 
-        <form onSubmit={addTodo} style={{ display: "flex", gap: "10px" }}>
+        <form onSubmit={addTodo} style={styles.form}>
           <input
             type="text"
-            placeholder="Enter task..."
+            placeholder="Write your task here..."
             value={task}
             onChange={(e) => setTask(e.target.value)}
-            onFocus={() => {
-              setError("");
-              setInputFocus(true);
-            }}
-            onBlur={() => setInputFocus(false)}
-            onMouseEnter={() => setInputFocus(true)}
-            onMouseLeave={() => setInputFocus(false)}
-            style={inputStyle}
+            onFocus={() => setError("")}
+            style={styles.input}
           />
-          <button
-            type="submit"
-            title="Add task"
-            disabled={loadingAdd}
-            style={{
-              padding: "10px 15px",
-              border: "none",
-              borderRadius: "8px",
-              background: addHover ? "#45a049" : "#4CAF50",
-              color: "#fff",
-              cursor: "pointer",
-              transition: "0.2s",
-            }}
-            onMouseEnter={() => setAddHover(true)}
-            onMouseLeave={() => setAddHover(false)}
-          >
-            {loadingAdd ? "Adding..." : "Add"}
+          <button type="submit" disabled={loadingAdd} style={styles.addBtn}>
+            {loadingAdd ? "Please wait..." : "Create"}
           </button>
         </form>
 
-        {error && (
-          <p style={{ color: "red", fontSize: "14px", marginTop: "8px" }}>
-            {error}
-          </p>
-        )}
+        {error && <p style={styles.error}>{error}</p>}
 
-        <ul style={{ listStyle: "none", padding: 0, marginTop: "20px" }}>
+        <div style={styles.listContainer}>
           {todos.map((todo) => (
-            <li
-              key={todo.id}
-              style={{
-                background: "#f9f9f9",
-                marginTop: "10px",
-                padding: "12px 15px",
-                borderRadius: "10px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+            <div key={todo._id} style={styles.todoCard}>
               <span>{todo.task}</span>
+
               <div>
                 <button
                   onClick={() => openModal(todo)}
-                  title="Edit task"
-                  style={{
-                    marginRight: "8px",
-                    border: "none",
-                    background: editHover[todo.id] ? "#e0b800" : "#ffc107",
-                    padding: "6px 10px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    transition: "0.2s",
-                  }}
-                  onMouseEnter={() =>
-                    setEditHover((prev) => ({ ...prev, [todo.id]: true }))
-                  }
-                  onMouseLeave={() =>
-                    setEditHover((prev) => ({ ...prev, [todo.id]: false }))
-                  }
+                  style={styles.editBtn}
                 >
-                  ✏
+                  Edit
                 </button>
 
                 <button
-                  onClick={() => deleteTodo(todo.id)}
-                  style={{
-                    border: "none",
-                    background: "#e74c3c",
-                    color: "#fff",
-                    padding: "6px 10px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                  }}
-                  disabled={loadingDelete === todo.id}
-                  title="Delete task"
+                  onClick={() => deleteTodo(todo._id)}
+                  disabled={loadingDelete === todo._id}
+                  style={styles.deleteBtn}
                 >
-                  {loadingDelete === todo.id ? "..." : "❌"}
+                  {loadingDelete === todo._id ? "..." : "Delete"}
                 </button>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
-      {/* MODAL */}
       {isModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              padding: "25px",
-              borderRadius: "12px",
-              width: "350px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "15px",
-              }}
-            >
-              <h3>Edit Task</h3>
-              <span
-                style={{ cursor: "pointer", fontSize: "18px" }}
-                onClick={() => !loadingUpdate && setIsModalOpen(false)}
-              >
-                ✖
-              </span>
-            </div>
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h3>Update Task</h3>
 
             <input
               type="text"
               value={editTask}
               onChange={(e) => setEditTask(e.target.value)}
-              onFocus={() => {
-                setEditError("");
-                setEditInputFocus(true);
-              }}
-              onBlur={() => setEditInputFocus(false)}
-              onMouseEnter={() => setEditInputFocus(true)}
-              onMouseLeave={() => setEditInputFocus(false)}
-              style={editInputStyle}
+              onFocus={() => setEditError("")}
+              style={styles.input}
             />
 
-            {editError && (
-              <p style={{ color: "red", fontSize: "14px", marginTop: "8px" }}>
-                {editError}
-              </p>
-            )}
+            {editError && <p style={styles.error}>{editError}</p>}
 
             <button
               onClick={updateTodo}
               disabled={loadingUpdate}
-              title="Update task"
-              style={{
-                marginTop: "15px",
-                width: "100%",
-                padding: "10px",
-                border: "none",
-                borderRadius: "8px",
-                background: updateHover ? "#45a049" : "#4CAF50",
-                color: "#fff",
-                cursor: "pointer",
-                transition: "0.2s",
-              }}
-              onMouseEnter={() => setUpdateHover(true)}
-              onMouseLeave={() => setUpdateHover(false)}
+              style={styles.updateBtn}
             >
-              {loadingUpdate ? "Updating..." : "Update"}
+              {loadingUpdate ? "Updating..." : "Save Changes"}
+            </button>
+
+            <button
+              onClick={() => !loadingUpdate && setIsModalOpen(false)}
+              style={styles.cancelBtn}
+            >
+              Cancel
             </button>
           </div>
         </div>
@@ -321,5 +173,120 @@ function App() {
     </div>
   );
 }
+
+/* ================= STYLES ================= */
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontFamily: "Segoe UI, sans-serif",
+  },
+  container: {
+    width: "500px",
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(15px)",
+    padding: "40px",
+    borderRadius: "20px",
+    boxShadow: "0 15px 40px rgba(0,0,0,0.4)",
+    color: "#fff",
+  },
+  title: { textAlign: "center", marginBottom: "5px" },
+  subtitle: {
+    textAlign: "center",
+    marginBottom: "30px",
+    fontSize: "14px",
+    opacity: 0.7,
+  },
+  form: { display: "flex", gap: "10px" },
+  input: {
+    flex: 1,
+    width: "100%",
+  boxSizing: "border-box",
+    padding: "12px",
+    borderRadius: "10px",
+    border: "none",
+    outline: "none",
+  },
+  addBtn: {
+    padding: "12px 18px",
+    borderRadius: "10px",
+    border: "none",
+    background: "#00c6ff",
+    color: "#fff",
+    cursor: "pointer",
+  },
+  listContainer: { marginTop: "25px" },
+  todoCard: {
+    background: "rgba(255,255,255,0.1)",
+    padding: "15px",
+    borderRadius: "12px",
+    marginBottom: "12px",
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  editBtn: {
+    marginRight: "8px",
+    padding: "6px 12px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#ffc107",
+    cursor: "pointer",
+  },
+  deleteBtn: {
+    padding: "6px 12px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#ff4d4d",
+    color: "#fff",
+    cursor: "pointer",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.6)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    background: "#1f1f1f",
+    padding: "30px",
+    borderRadius: "15px",
+    width: "350px",
+    color: "#fff",
+  },
+  updateBtn: {
+    marginTop: "15px",
+    width: "100%",
+    padding: "10px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#00c851",
+    color: "#fff",
+    cursor: "pointer",
+  },
+  cancelBtn: {
+    marginTop: "10px",
+    width: "100%",
+    padding: "10px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#555",
+    color: "#fff",
+    cursor: "pointer",
+  },
+  error: {
+    color: "#ff6b6b",
+    fontSize: "13px",
+    marginTop: "8px",
+  },
+};
 
 export default App;
