@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import api from "../api/api";
 import TodoCard from "../components/TodoCard";
 import { useNavigate } from "react-router-dom";
-import { model } from "mongoose";
 
 export default function TodoPage() {
   const navigate = useNavigate();
