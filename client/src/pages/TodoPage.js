@@ -239,6 +239,8 @@ const styles = {
   subtitle: { fontSize: "14px", opacity: 0.7 },
   form: { display: "flex", gap: "10px" },
   input: {
+    width: "100%",
+    boxSizing: "border-box",
     flex: 1,
     padding: "12px",
     borderRadius: "10px",
