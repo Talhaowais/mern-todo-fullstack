@@ -204,7 +204,8 @@ export default function TodoPage() {
 
 const styles = {
   modalHeading: {
-    textAlign: "center"
+    textAlign: "center",
+    marginBottom: "15%"
   },
   page: {
     minHeight: "100vh",
@@ -242,7 +243,6 @@ const styles = {
   subtitle: { fontSize: "14px", opacity: 0.7 },
   form: { display: "flex", gap: "10px" },
   input: {
-    marginTop:"15%",
     width: "100%",
     boxSizing: "border-box",
     flex: 1,
