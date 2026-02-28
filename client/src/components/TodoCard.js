@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function TodoCard({ todo, onEdit, onDelete, loadingDelete }) {
   return (
