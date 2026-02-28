@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/api";
 import TodoCard from "../components/TodoCard";
 import { useNavigate } from "react-router-dom";
+import { model } from "mongoose";
 
 export default function TodoPage() {
   const navigate = useNavigate();
@@ -167,7 +168,7 @@ export default function TodoPage() {
       {isModalOpen && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
-            <h3>Update Task</h3>
+            <h3 style={styles.modalHeading}>Update Task</h3>
 
             <input
               type="text"
@@ -203,6 +204,9 @@ export default function TodoPage() {
 /* ================= STYLES ================= */
 
 const styles = {
+  modalHeading: {
+    textAlign: "center"
+  },
   page: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
@@ -239,6 +243,7 @@ const styles = {
   subtitle: { fontSize: "14px", opacity: 0.7 },
   form: { display: "flex", gap: "10px" },
   input: {
+    marginTop:"15%",
     width: "100%",
     boxSizing: "border-box",
     flex: 1,
