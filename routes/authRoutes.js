@@ -54,9 +54,10 @@ router.post("/login", async (req, res) => {
 
     // set HTTP-only cookie
     res.cookie("token", token, {
-      httpOnly: true,
-      maxAge: COOKIE_EXPIRATION,
-      sameSite: "lax",
+    httpOnly: true,
+    secure: true,        // REQUIRED for SameSite=None
+    sameSite: "none",    // allow cross-site cookie
+    maxAge: COOKIE_EXPIRATION,
     });
 
     res.json({ message: "Login successful" });
